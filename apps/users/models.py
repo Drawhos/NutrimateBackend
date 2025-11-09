@@ -25,7 +25,6 @@ class User(AbstractBaseUser):
     first_name = models.TextField(max_length=30)
     last_name = models.TextField(max_length=30)
     date_joined = models.DateTimeField(auto_now_add=True)
-    password = models.CharField(max_length=128)
     
     ## Uno a Uno
     progress = models.OneToOneField(
