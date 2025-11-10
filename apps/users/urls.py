@@ -1,6 +1,6 @@
-from django.urls import path, include
-from rest_framework import routers
+from django.urls import path
 from .api.api import UserCreateAPIView, UserLoginAPIView
+
 
 urlpatterns = [
     path('register/', UserCreateAPIView.as_view(), name='user-create'),

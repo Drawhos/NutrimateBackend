@@ -1,9 +1,13 @@
 from rest_framework import serializers
 from apps.users.models import User, Ideal
 from apps.diets.models import Tag
+from Nutrimate.core.enums import Goal
 
 
 class IdealSerializer(serializers.ModelSerializer):
+    ideal_weight = serializers.FloatField(required=True, min_value=30, max_value=100)
+    goal = serializers.ChoiceField(choices=Ideal._meta.get_field('goal').choices, required=False)
+    
     class Meta:
         model = Ideal
         fields = [
@@ -11,7 +15,7 @@ class IdealSerializer(serializers.ModelSerializer):
             'goal',
             'ideal_weight'
         ]
-        read_only_fields = ['id','created_at']
+        read_only_fields = ['id','goal','created_at']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -46,6 +50,17 @@ class UserSerializer(serializers.ModelSerializer):
 
         if ideal_data:
             ideal_obj = Ideal.objects.create(**ideal_data)
+            if ideal_obj.ideal_weight == user.weight:
+                raise serializers.ValidationError({
+                'ideal_weight': f'El peso ideal y el peso actual no pueden ser los mismos. Peso elegido: {ideal_obj.ideal_weight}'
+                })
+            elif ideal_obj.ideal_weight is None:
+                ideal_obj.goal = Goal.NUTRITION
+            elif ideal_obj.ideal_weight < user.weight:
+                ideal_obj.goal = Goal.LOSE_WEIGHT
+            else:
+                ideal_obj.goal = Goal.GAIN_WEIGHT
+            ideal_obj.save()
             user.ideal = ideal_obj
             user.save()
 
@@ -69,7 +84,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id','date_joined']
 
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
-    

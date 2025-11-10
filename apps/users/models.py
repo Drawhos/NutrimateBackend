@@ -82,8 +82,7 @@ class Progress(models.Model):
 class Ideal(models.Model):
     goal = models.CharField(
         max_length=1,
-        choices=Goal.choices,
-        default=Goal.NUTRITION
+        choices=Goal.choices
     )
     ideal_weight = models.FloatField(help_text="Peso Ideal en kilogramos", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
