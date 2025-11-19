@@ -1,5 +1,4 @@
-from rest_framework import generics, status, serializers
-from rest_framework.response import Response
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from apps.diets.models import Diet, Tag, Recipe
@@ -97,7 +96,7 @@ class RecipeDeleteAPIView(generics.DestroyAPIView):
 class DietCreateAPIView(generics.CreateAPIView):
     """API view for Diet model.
 
-    POST: Create a new diet. Requires authentication.
+    POST: Create a new diet. Requires being an authenticated user.
 
     Request body (POST): {"recipes": [recipe_id1, recipe_id2, ...] }
     Response (POST): { "id": 1, "startDate": "YYYY-MM-DD", "endDate": "YYYY-MM-DD", "recipes": [recipe_id1, recipe_id2, ...], "user": user_id }

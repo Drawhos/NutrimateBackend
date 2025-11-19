@@ -55,29 +55,15 @@ class User(AbstractBaseUser):
     def __str__(self):
         return self.email
 
-class Historical(models.Model):
-    # uno a muchos
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name='historicals'
-    )
-    diets = models.ManyToManyField(
-        'diets.Diet',
-        related_name='historical_diets',
-        blank=True,
-    )
-    date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.activity} on {self.date}" ##
     
 class Progress(models.Model):
     bmi = models.FloatField(help_text="Indice de Masa Corporal")
-    date_recorded = models.DateTimeField(auto_now_add=True)
+    current_weight = models.FloatField(help_text="Peso actual en kilogramos")
+    current_height = models.FloatField(help_text="Altura actual en centímetros")
+    last_updated = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Progress recorded on {self.date_recorded} with a BMI of {self.bmi}"
+        return f"Progress recorded on {self.last_updated} with a BMI of {self.bmi}"
 
 class Ideal(models.Model):
     goal = models.CharField(
@@ -88,4 +74,4 @@ class Ideal(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ideal for {self.user.username} recorded on {self.created_at}"
+        return f"Ideal for {self.user.first_name} recorded on {self.created_at}"

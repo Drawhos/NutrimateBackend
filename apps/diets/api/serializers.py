@@ -75,17 +75,57 @@ class MenuSerializer(serializers.ModelSerializer):
     recipes = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Recipe.objects.all(),
-        required=False
+        required=False,
+        write_only=True
     )
+    detailed_recipes = RecipeSerializer(many=True, read_only=True, source='recipes')
 
     class Meta:
         model = Menu
         fields = [
             'id',
             'day',
-            'recipes'
+            'recipes',
+            'detailed_recipes'
         ]
         read_only_fields = ['id']
+
+
+class RecipeDetailedSerializer(serializers.ModelSerializer):
+    """Minimal recipe serializer for historical diet view"""
+    class Meta:
+        model = Recipe
+        fields = [
+            'name',
+            'description',
+            'ingredients',
+            'preparation_steps'
+        ]
+
+
+class MenuDetailedSerializer(serializers.ModelSerializer):
+    """Minimal menu serializer showing day and recipes only"""
+    recipes = RecipeDetailedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Menu
+        fields = [
+            'day',
+            'recipes',
+        ]
+
+
+class DietDetailedSerializer(serializers.ModelSerializer):
+    """Minimal diet serializer for historical view with only essential fields"""
+    menus = MenuDetailedSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Diet
+        fields = [
+            'startDate',
+            'endDate',
+            'menus'
+        ]
 
 
 class DietSerializer(serializers.ModelSerializer):
@@ -139,7 +179,7 @@ class DietSerializer(serializers.ModelSerializer):
         # Build list of 21 recipes (3 per day for 7 days)
         result_recipes = []
 
-        for i in range(7):
+        for _ in range(7):
             # Use item from original pool
             if breakfasts:
                 result_recipes.append(breakfasts.pop())
