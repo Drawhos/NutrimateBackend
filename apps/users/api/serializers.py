@@ -3,8 +3,6 @@ from apps.users.models import User, Ideal, Progress
 from apps.diets.models import Tag
 from Nutrimate.core.enums import Goal
 
-from apps.diets.api.serializers import DietSerializer
-
 
 class IdealSerializer(serializers.ModelSerializer):
     ideal_weight = serializers.FloatField(required=True, min_value=30, max_value=100)
