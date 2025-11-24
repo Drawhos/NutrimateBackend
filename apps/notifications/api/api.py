@@ -24,7 +24,7 @@ class EmailAPIView(generics.GenericAPIView):
     Response (POST): 200 OK with count of emails sent
     """
     
-    # permission_classes = [IsAdminUser]  # Only admins can send bulk emails
+    permission_classes = [IsAdminUser]  # Only admins can send bulk emails
     
     def post(self, request, *args, **kwargs):
         subject = "Notificación de Nutrimate"

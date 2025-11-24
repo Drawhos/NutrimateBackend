@@ -92,6 +92,19 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id','date_joined', 'email_opt_out']
 
 
+class AdminUserSerializer(UserSerializer):
+    """Serializer used by admin-only API to create admin/staff users.
+
+    This exposes `is_staff` and `is_superuser` so an admin can create staff or other admin accounts.
+    The view must enforce who is allowed to set `is_superuser`.
+    """
+    is_staff = serializers.BooleanField(required=False, default=True)
+    is_superuser = serializers.BooleanField(required=False, default=False)
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ['is_staff', 'is_superuser']
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)

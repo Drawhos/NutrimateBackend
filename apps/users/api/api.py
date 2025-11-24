@@ -1,5 +1,5 @@
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
@@ -8,12 +8,37 @@ from apps.diets.models import Diet
 from apps.diets.api.serializers import DietDetailedSerializer
 from apps.users.models import User
 
-from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer
+from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer, AdminUserSerializer
+from rest_framework.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 
 
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class = UserSerializer
+
+
+class AdminCreateAPIView(generics.CreateAPIView):
+    """API endpoint to create admin/staff users. Only accessible to admin users.
+
+    - Only requests authenticated as admin (IsAdminUser) can call this endpoint.
+    - If the payload attempts to set is_superuser=True, the requester must be a superuser.
+    """
+    permission_classes = [IsAdminUser]
+    serializer_class = AdminUserSerializer
+
+    def perform_create(self, serializer):
+        # if trying to create a superuser, require the requester to be superuser
+        wanting_super = serializer.validated_data.get('is_superuser', False)
+        if wanting_super and not (self.request.user and self.request.user.is_superuser):
+            raise PermissionDenied('Only superusers may create superuser accounts')
+
+        # Ensure created admin accounts are active and staff by default if not provided
+        serializer.validated_data.setdefault('is_staff', True)
+        serializer.validated_data.setdefault('is_active', True)
+
+        # Delegate to normal save
+        serializer.save()
+
 
 class UserGetAPIView(generics.ListAPIView):
     serializer_class = UserSerializer

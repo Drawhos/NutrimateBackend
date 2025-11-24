@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from Nutrimate.core.enums import Goal
 
 class UserManager(BaseUserManager):
@@ -17,7 +17,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self.create_user(email, password, **extra_fields)
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('Correo electrónico', max_length=255, unique=True)
     age = models.PositiveSmallIntegerField()
     height = models.FloatField(help_text="Altura en centímetros")
@@ -51,6 +51,20 @@ class User(AbstractBaseUser):
         'Email opt-out',
         default=False,
         help_text='Si es True, el usuario no recibirá notificaciones por email'
+    )
+
+    # Flags required by Django auth for admin/staff permissions
+    is_staff = models.BooleanField(
+        'staff status',
+        default=False,
+        help_text='Designates whether the user can log into this admin site.',
+    )
+
+    is_active = models.BooleanField(
+        'active',
+        default=True,
+        help_text='Designates whether this user should be treated as active. '
+                  'Unselect this instead of deleting accounts.',
     )
     
     USERNAME_FIELD = 'email'

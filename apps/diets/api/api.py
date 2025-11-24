@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from apps.diets.models import Diet, Tag, Recipe
 
@@ -16,6 +16,7 @@ class TagListCreateAPIView(generics.ListCreateAPIView):
     Response (GET): [ { "id": 1, "name": "...", "description": "..." }, ... ]
     Response (POST): { "id": 1, "name": "...", "description": "..." }
     """
+    permission_classes = [IsAdminUser]
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     
@@ -35,6 +36,7 @@ class TagDeleteAPIView(generics.DestroyAPIView):
 
     Response (DELETE): 204 No Content
     """
+    permission_classes = [IsAdminUser]
     queryset = Tag.objects.all()
 
 
@@ -71,6 +73,7 @@ class RecipeListCreateAPIView(generics.ListCreateAPIView):
     Response (GET): List of recipe objects
     Response (POST): Created recipe object(s)
     """
+    permission_classes = [IsAdminUser]
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
 
@@ -90,6 +93,7 @@ class RecipeDeleteAPIView(generics.DestroyAPIView):
 
     Response (DELETE): 204 No Content
     """
+    permission_classes = [IsAdminUser]
     queryset = Recipe.objects.all()
 
 
@@ -115,4 +119,5 @@ class DietDeleteAPIView(generics.DestroyAPIView):
 
     Response (DELETE): 204 No Content
     """
+    permission_classes = [IsAuthenticated]
     queryset = Diet.objects.all()
