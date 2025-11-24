@@ -47,6 +47,12 @@ class User(AbstractBaseUser):
         blank=True,
     )
     
+    email_opt_out = models.BooleanField(
+        'Email opt-out',
+        default=False,
+        help_text='Si es True, el usuario no recibirá notificaciones por email'
+    )
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'age', 'height', 'weight']
 

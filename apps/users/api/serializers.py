@@ -27,6 +27,12 @@ class UserSerializer(serializers.ModelSerializer):
     weight = serializers.FloatField(required=True, min_value=30, max_value=170)
     password = serializers.CharField(write_only=True, required=True, min_length=4)
     
+    def validate_email(self, value):
+        """Validate that the email does not already exist."""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Un usuario con este correo electrónico ya existe.")
+        return value
+    
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
@@ -81,8 +87,9 @@ class UserSerializer(serializers.ModelSerializer):
             'progress',
             'tags',
             'ideal',
+            'email_opt_out'
         ]
-        read_only_fields = ['id','date_joined']
+        read_only_fields = ['id','date_joined', 'email_opt_out']
 
 
 class LoginSerializer(serializers.Serializer):

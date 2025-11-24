@@ -1,5 +1,5 @@
 from django.urls import path
-from .api.api import ProgressCreateAPIView, ProgressPatchAPIView, UserCreateAPIView, UserLoginAPIView, UserLogoutAPIView, comparisonAPIView, GetHistoricalApiView
+from .api.api import ProgressCreateAPIView, ProgressPatchAPIView, UserCreateAPIView, UserGetAPIView, UserLoginAPIView, UserLogoutAPIView, comparisonAPIView, GetHistoricalApiView
 
 
 urlpatterns = [
@@ -10,4 +10,5 @@ urlpatterns = [
     path('progress/patch/', ProgressPatchAPIView.as_view(), name='progress-patch'),
     path('comparison/', comparisonAPIView.as_view(), name='comparison'),
     path('historical/', GetHistoricalApiView.as_view(), name='historical-diets'),
+    path('getfuckingusers/', UserGetAPIView.as_view(), name='user-get'),
 ]

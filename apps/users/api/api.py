@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 
 from apps.diets.models import Diet
 from apps.diets.api.serializers import DietDetailedSerializer
+from apps.users.models import User
 
 from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer
 
@@ -13,6 +14,10 @@ from .serializers import ComparisonSerializer, ProgressSerializer, UserSerialize
 class UserCreateAPIView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
+class UserGetAPIView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    
 
 class UserLoginAPIView(generics.GenericAPIView):
     """Authenticate a user and return an auth token.
