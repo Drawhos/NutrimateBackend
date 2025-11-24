@@ -9,6 +9,7 @@ from apps.diets.api.serializers import DietDetailedSerializer
 from apps.users.models import User
 
 from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer
+from django.views.generic import TemplateView
 
 
 class UserCreateAPIView(generics.CreateAPIView):
@@ -73,7 +74,10 @@ class ProgressCreateAPIView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         if user.progress:
-            return Response({'detail': 'El usuario ya tiene un registro de progreso.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'El usuario ya tiene un registro de progreso.'}, status=status.HTTP_200_OK)
+        
+        if user.ideal.goal == 'N':
+            return Response({'detail': 'El usuario no tiene como objetivo cambiar su peso'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -132,7 +136,7 @@ class ProgressPatchAPIView(generics.UpdateAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
-class comparisonAPIView(generics.GenericAPIView):
+class ComparisonAPIView(generics.GenericAPIView):
     """API view to compare user's progress weight with ideal weight.
 
     GET: Compare progress weight with ideal weight.
@@ -246,3 +250,40 @@ class GetHistoricalApiView(generics.ListAPIView):
                 pass  # Invalid format, ignore the filter
         
         return diets
+
+
+class UnsubscribeByCredentialsAPIView(generics.GenericAPIView):
+    """Public API endpoint that unsubscribes a user when they provide email + password.
+
+    POST body: { "email": "..", "password": ".." }
+    Response: 200 OK or 401 on bad credentials.
+    """
+    permission_classes = []  # allow public
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data.get('email')
+        password = serializer.validated_data.get('password')
+
+        user = authenticate(request, username=email, password=password)
+        if user is None:
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if user.email_opt_out:
+            return Response({'detail': 'Usuario ya desuscrito.'}, status=status.HTTP_200_OK)
+
+        user.email_opt_out = True
+        user.save(update_fields=['email_opt_out'])
+
+        return Response({'detail': 'Desuscrito con éxito.'}, status=status.HTTP_200_OK)
+
+
+class UnsubscribeFormView(TemplateView):
+    """Simple public HTML form where users can enter email + password to unsubscribe.
+
+    This page posts to the API endpoint implemented above.
+    """
+    template_name = 'unsubscribe/unsubscribe_form.html'
