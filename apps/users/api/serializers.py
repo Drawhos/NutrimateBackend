@@ -18,6 +18,22 @@ class IdealSerializer(serializers.ModelSerializer):
         read_only_fields = ['id','goal','created_at']
 
 
+
+class ProgressSerializer(serializers.ModelSerializer):
+    current_weight = serializers.FloatField(required=True, min_value=30, max_value=170)
+    current_height = serializers.FloatField(required=True, min_value=60, max_value=270)
+    class Meta:
+        model = Progress
+        fields = [
+            'id',
+            'bmi',
+            'last_updated',
+            'current_weight',
+            'current_height'
+        ]
+        read_only_fields = ['id', 'last_updated', 'bmi']
+
+
 class UserSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(required=True, max_length=30)
     last_name = serializers.CharField(required=False, max_length=30)
@@ -38,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         required=False
     )
-    progress = serializers.PrimaryKeyRelatedField(
+    progress = ProgressSerializer(
         required=False,
         allow_null=True,
         read_only=True
@@ -110,19 +126,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True)
 
 
-class ProgressSerializer(serializers.ModelSerializer):
-    current_weight = serializers.FloatField(required=True, min_value=30, max_value=170)
-    current_height = serializers.FloatField(required=True, min_value=60, max_value=270)
-    class Meta:
-        model = Progress
-        fields = [
-            'id',
-            'bmi',
-            'last_updated',
-            'current_weight',
-            'current_height'
-        ]
-        read_only_fields = ['id', 'last_updated', 'bmi']
+
 
 
 class ComparisonSerializer(serializers.Serializer):

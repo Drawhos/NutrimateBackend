@@ -43,6 +43,15 @@ class AdminCreateAPIView(generics.CreateAPIView):
 class UserGetAPIView(generics.ListAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+
+class UserMeAPIView(generics.RetrieveUpdateAPIView):
+    """Get current user profile"""
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
     
 
 class UserLoginAPIView(generics.GenericAPIView):
