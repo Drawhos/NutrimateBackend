@@ -177,36 +177,44 @@ class DietSerializer(serializers.ModelSerializer):
         dinners_backup = dinners.copy()
 
         # Build list of 21 recipes (3 per day for 7 days)
+        # Each day has [breakfast, lunch, dinner] in fixed positions
         result_recipes = []
 
         for _ in range(7):
-            # Use item from original pool
+            # Breakfast (index 0 of the day)
             if breakfasts:
                 result_recipes.append(breakfasts.pop())
-            # If original pool is empty, can reuse from backup
-            # Pick a random item from backup (don't remove, allow repetition)
             elif breakfasts_backup:
                 result_recipes.append(random.choice(breakfasts_backup))
+            else:
+                result_recipes.append(None)  # Leave empty if no breakfast available
 
-            # Lunch
+            # Lunch (index 1 of the day)
             if lunches:
                 result_recipes.append(lunches.pop())
             elif lunches_backup:
                 result_recipes.append(random.choice(lunches_backup))
+            else:
+                result_recipes.append(None)  # Leave empty if no lunch available
 
-            # Dinner
+            # Dinner (index 2 of the day)
             if dinners:
                 result_recipes.append(dinners.pop())
             elif dinners_backup:
                 result_recipes.append(random.choice(dinners_backup))
+            else:
+                result_recipes.append(None)  # Leave empty if no dinner available
 
         # Create 7 Menu instances (one per day)
         menu_instances = []
         for day_idx in range(7):
             day_recipes = result_recipes[day_idx*3:(day_idx+1)*3]
+            # Filter out None values to avoid errors when setting m2m relationships
+            day_recipes = [recipe for recipe in day_recipes if recipe is not None]
             menu = Menu.objects.create(day=day_idx + 1)
             # set m2m recipes for the menu
-            menu.recipes.set(day_recipes)
+            if day_recipes:  # Only set if there are recipes
+                menu.recipes.set(day_recipes)
             menu_instances.append(menu)
 
         # Remove menus from validated_data before creating Diet via super()
