@@ -1,7 +1,7 @@
 from django.urls import path
 from .api.api import (
     ProgressCreateAPIView, ProgressPatchAPIView, UserCreateAPIView, AdminCreateAPIView,
-    UserGetAPIView, UserLoginAPIView, UserLogoutAPIView,
+    UserListAPIView, UserLoginAPIView, UserLogoutAPIView,
     ComparisonAPIView, GetHistoricalApiView, UnsubscribeByCredentialsAPIView,
     UnsubscribeFormView
 )
@@ -18,5 +18,5 @@ urlpatterns = [
     path('historical/', GetHistoricalApiView.as_view(), name='historical-diets'),
     path('unsubscribe/form/', UnsubscribeFormView.as_view(), name='unsubscribe-form'),
     path('unsubscribe-by-credentials/', UnsubscribeByCredentialsAPIView.as_view(), name='unsubscribe-by-credentials'),
-    path('getfuckingusers/', UserGetAPIView.as_view(), name='user-get'),
+    path('get-users/', UserListAPIView.as_view(), name='user-get'),
 ]

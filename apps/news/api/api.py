@@ -22,7 +22,7 @@ class NewsListAPIView(APIView):
         returns HTTP 400.
     - Titles are deduplicated while preserving order before being forwarded.
 
- }   Responses:
+    Responses:
     - 200 OK with JSON from external API on success
     - 400 Bad Request if too many titles are provided
     - 502 Bad Gateway if the external service returns an error or is unreachable
