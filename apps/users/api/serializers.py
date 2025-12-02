@@ -6,7 +6,7 @@ from Nutrimate.core.enums import Goal
 
 class IdealSerializer(serializers.ModelSerializer):
     ideal_weight = serializers.FloatField(required=False, min_value=30, max_value=100)
-    goal = serializers.ChoiceField(choices=Ideal._meta.get_field('goal').choices, required=False)
+    goal = serializers.ChoiceField(choices=Ideal._meta.get_field('goal').choices, required=True)
     
     class Meta:
         model = Ideal
@@ -15,7 +15,7 @@ class IdealSerializer(serializers.ModelSerializer):
             'goal',
             'ideal_weight'
         ]
-        read_only_fields = ['id','goal','created_at']
+        read_only_fields = ['id','created_at']
 
 
 class UserSerializer(serializers.ModelSerializer):

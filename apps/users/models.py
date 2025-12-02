@@ -42,9 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     ideal = models.OneToOneField(
         'Ideal',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE
     )
     
     email_opt_out = models.BooleanField(
