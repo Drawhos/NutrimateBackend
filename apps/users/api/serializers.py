@@ -87,7 +87,9 @@ class UserSerializer(serializers.ModelSerializer):
             'progress',
             'tags',
             'ideal',
-            'email_opt_out'
+            'email_opt_out',
+            'is_staff',
+            'is_superuser'
         ]
         read_only_fields = ['id','date_joined', 'email_opt_out']
 
