@@ -16,7 +16,6 @@ class TagListCreateAPIView(generics.ListCreateAPIView):
     Response (GET): [ { "id": 1, "name": "...", "description": "..." }, ... ]
     Response (POST): { "id": 1, "name": "...", "description": "..." }
     """
-    permission_classes = [IsAdminUser]
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     
