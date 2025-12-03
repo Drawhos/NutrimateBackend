@@ -8,7 +8,7 @@ from apps.diets.models import Diet
 from apps.diets.api.serializers import DietDetailedSerializer
 from apps.users.models import User
 
-from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer, AdminUserSerializer
+from .serializers import ComparisonSerializer, ProgressSerializer, UserSerializer, LoginSerializer, AdminUserSerializer, ChangePasswordSerializer
 from rest_framework.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 
@@ -82,6 +82,43 @@ class UserLogoutAPIView(generics.GenericAPIView):
         user = request.user
         Token.objects.filter(user=user).delete()
         return Response({'detail': 'Sesión cerrada exitosamente'}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordAPIView(generics.GenericAPIView):
+    """API view for authenticated users to change their password.
+
+    POST: Change the user's password.
+
+    Request body (POST): {
+        "old_password": "string",
+        "new_password": "string",
+        "confirm_password": "string"
+    }
+    
+    Response (200): { "detail": "Contraseña actualizada exitosamente" }
+    Response (400): { "detail": "Errores de validación" }
+    Response (401): { "detail": "Contraseña anterior incorrecta" }
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ChangePasswordSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        old_password = serializer.validated_data.get('old_password')
+        new_password = serializer.validated_data.get('new_password')
+
+        # Validate that old_password is correct
+        if not user.check_password(old_password):
+            return Response({'detail': 'Contraseña anterior incorrecta'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Set new password
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'detail': 'Contraseña actualizada exitosamente'}, status=status.HTTP_200_OK)
 
     
 class ProgressCreateAPIView(generics.CreateAPIView):

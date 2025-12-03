@@ -16,10 +16,15 @@ User = get_user_model()
 class EmailAPIViewTests(TestCase):
 
     def setUp(self):
+        from apps.users.models import Ideal
+        from Nutrimate.core.enums import Goal
+        
         self.factory = APIRequestFactory()
         # Ensure from email is set so sending logic doesn't fail by default
         settings.DEFAULT_FROM_EMAIL = "noreply@test.com"
 
+        # admin ideal
+        admin_ideal = Ideal.objects.create(goal=Goal.NUTRITION)
         # custom User model requires several required fields, so use create_user
         self.admin = User.objects.create_user(
             email="admin@test.com",
@@ -31,10 +36,17 @@ class EmailAPIViewTests(TestCase):
             weight=70.0,
             is_staff=True,
             is_superuser=True,
+            ideal=admin_ideal,
         )
 
     def make_user(self, email, email_opt_out=False):
         """Helper to create a valid user for tests using required fields."""
+        # create a minimal Ideal for the user (User.ideal is non-nullable)
+        from apps.users.models import Ideal
+        from Nutrimate.core.enums import Goal
+
+        ideal = Ideal.objects.create(goal=Goal.NUTRITION)
+
         return User.objects.create_user(
             email=email,
             password="pass",
@@ -44,6 +56,7 @@ class EmailAPIViewTests(TestCase):
             height=170.0,
             weight=70.0,
             email_opt_out=email_opt_out,
+            ideal=ideal,
         )
 
     # ---------- TEST CASES ----------

@@ -134,6 +134,37 @@ class DietSerializer(serializers.ModelSerializer):
     # Return fully-formed menus (day + recipe ids) instead of just PKs
     menus = MenuSerializer(many=True, read_only=True)
     
+    def validate(self, data):
+        """Validate that the user doesn't have an active diet in the requested date range."""
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        user = self.context.get('request').user if self.context.get('request') else data.get('user')
+        
+        # Determine start_date
+        if 'startDate' in data:
+            start_date = data['startDate']
+        else:
+            start_date = timezone.now().date()
+        
+        # Calculate end_date (one week later)
+        end_date = start_date + timedelta(days=7)
+        
+        # Check if user has an active diet that overlaps with this date range
+        conflicting_diet = Diet.objects.filter(
+            user=user,
+            startDate__lte=end_date,
+            endDate__gte=start_date
+        ).exists()
+        
+        if conflicting_diet:
+            raise serializers.ValidationError(
+                'El usuario ya tiene una dieta activa en este período. '
+                'Solo se permite una dieta por semana.'
+            )
+        
+        return data
+    
     def create(self, validated_data):
         from datetime import timedelta
         from django.utils import timezone

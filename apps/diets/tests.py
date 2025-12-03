@@ -7,6 +7,11 @@ from apps.diets.models import Tag, Recipe, Diet, Menu
 
 class DietsAPITestCase(TestCase):
 	def setUp(self):
+		from apps.users.models import Ideal
+		from Nutrimate.core.enums import Goal
+		
+		# Create admin ideal
+		admin_ideal = Ideal.objects.create(goal=Goal.NUTRITION)
 		# Create an admin user
 		self.admin = User.objects.create_superuser(
 			email='admin@example.com',
@@ -16,8 +21,11 @@ class DietsAPITestCase(TestCase):
 			age=30,
 			height=170,
 			weight=70,
+			ideal=admin_ideal,
 		)
 
+		# Create user ideal
+		user_ideal = Ideal.objects.create(goal=Goal.NUTRITION)
 		# Create a regular user
 		self.user = User.objects.create_user(
 			email='user@example.com',
@@ -27,6 +35,7 @@ class DietsAPITestCase(TestCase):
 			age=26,
 			height=175,
 			weight=75,
+			ideal=user_ideal,
 		)
 
 		self.client = APIClient()
@@ -96,10 +105,16 @@ class DietsSerializerLogicTests(TestCase):
 		"""
 
 		def setUp(self):
+			from apps.users.models import Ideal
+			from Nutrimate.core.enums import Goal
+			
+			# create user ideal
+			user_ideal = Ideal.objects.create(goal=Goal.NUTRITION)
 			# create user and tags
 			self.user = User.objects.create_user(
 				email='bizuser@example.com', password='bizpass',
-				first_name='Biz', last_name='Logic', age=28, height=170, weight=68
+				first_name='Biz', last_name='Logic', age=28, height=170, weight=68,
+				ideal=user_ideal
 			)
    
         # ---------- TEST CASES ----------

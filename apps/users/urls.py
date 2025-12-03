@@ -1,7 +1,7 @@
 from django.urls import path
 from .api.api import (
     ProgressCreateAPIView, ProgressPatchAPIView, UserCreateAPIView, AdminCreateAPIView,
-    UserListAPIView, UserLoginAPIView, UserLogoutAPIView,
+    UserListAPIView, UserLoginAPIView, UserLogoutAPIView, ChangePasswordAPIView,
     ComparisonAPIView, GetHistoricalApiView, UnsubscribeByCredentialsAPIView,
     UnsubscribeFormView
 )
@@ -12,6 +12,7 @@ urlpatterns = [
     path('admin/create/', AdminCreateAPIView.as_view(), name='admin-create'),
     path('login/', UserLoginAPIView.as_view(), name='user-login'),
     path('logout/', UserLogoutAPIView.as_view(), name='user-logout'),
+    path('change-password/', ChangePasswordAPIView.as_view(), name='change-password'),
     path('progress/', ProgressCreateAPIView.as_view(), name='progress-create'),
     path('progress/patch/', ProgressPatchAPIView.as_view(), name='progress-patch'),
     path('comparison/', ComparisonAPIView.as_view(), name='comparison'),

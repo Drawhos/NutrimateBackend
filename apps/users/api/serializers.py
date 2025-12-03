@@ -45,6 +45,19 @@ class UserSerializer(serializers.ModelSerializer):
     )
     ideal = IdealSerializer(required=True)
 
+    def validate(self, data):
+        """Validate that ideal_weight is different from current weight before creating."""
+        ideal_data = data.get('ideal')
+        weight = data.get('weight')
+        
+        if ideal_data and ideal_data.get('ideal_weight'):
+            if ideal_data.get('ideal_weight') == weight:
+                raise serializers.ValidationError({
+                    'ideal': f'El peso ideal y el peso actual no pueden ser los mismos. Peso elegido: {ideal_data.get("ideal_weight")}'
+                })
+        
+        return data
+
     def create(self, validated_data):
         ideal_data = validated_data.pop('ideal', None)
         user = super().create(validated_data)
@@ -56,16 +69,15 @@ class UserSerializer(serializers.ModelSerializer):
 
         if ideal_data:
             ideal_obj = Ideal.objects.create(**ideal_data)
-            if ideal_obj.ideal_weight == user.weight:
-                raise serializers.ValidationError({
-                'ideal_weight': f'El peso ideal y el peso actual no pueden ser los mismos. Peso elegido: {ideal_obj.ideal_weight}'
-                })
-            elif ideal_obj.ideal_weight is None:
+            
+            # Set goal based on ideal_weight
+            if ideal_obj.ideal_weight is None:
                 ideal_obj.goal = Goal.NUTRITION
             elif ideal_obj.ideal_weight < user.weight:
                 ideal_obj.goal = Goal.LOSE_WEIGHT
             else:
                 ideal_obj.goal = Goal.GAIN_WEIGHT
+            
             ideal_obj.save()
             user.ideal = ideal_obj
             user.save()
@@ -132,3 +144,20 @@ class ComparisonSerializer(serializers.Serializer):
     percentage = serializers.FloatField(required=False, min_value=60, max_value=270)
     achieved_goal = serializers.BooleanField()
     bmi = serializers.FloatField()
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer to validate old password and new password for authenticated users."""
+    old_password = serializers.CharField(write_only=True, required=True, min_length=4)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=4)
+    confirm_password = serializers.CharField(write_only=True, required=True, min_length=4)
+
+    def validate(self, data):
+        """Validate that new_password and confirm_password match."""
+        if data.get('new_password') != data.get('confirm_password'):
+            raise serializers.ValidationError({'confirm_password': 'Las contraseñas no coinciden.'})
+        
+        if data.get('old_password') == data.get('new_password'):
+            raise serializers.ValidationError({'new_password': 'La nueva contraseña debe ser diferente a la anterior.'})
+        
+        return data
